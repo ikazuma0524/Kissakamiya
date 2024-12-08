@@ -118,8 +118,8 @@ export default function JuniorHighPage() {
                     </CardHeader>
                     <CardContent>
                       {info.target && <p className="text-sm font-medium mb-2">{info.target}</p>}
-                      {info.requirements && <p className="text-sm text-red-500 mb-2">{info.requirements}</p>}
-                      {info.subjects && <p className="text-sm text-blue-600 mb-2">{info.subjects}</p>}
+                      {"requirements" in info && <p className="text-sm text-red-500 mb-2">{info.requirements}</p>}
+                      {"subjects" in info && <p className="text-sm text-blue-600 mb-2">{info.subjects}</p>}
                       <p className="text-sm text-gray-600">{info.description}</p>
                     </CardContent>
                   </Card>
