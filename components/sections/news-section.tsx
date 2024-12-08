@@ -1,69 +1,107 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calendar, BookOpen } from "lucide-react";
+import { Calendar } from "lucide-react";
+import Link from "next/link";
+import { client } from "@/lib/client";
+
+type Article = {
+  id: string;
+  title: string;
+  published: string;
+  content: string;
+};
 
 export function NewsSection() {
+  const [articles, setArticles] = useState<Article[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function fetchArticles() {
+      try {
+        const { contents } = await client.get<{ contents: Article[] }>({
+          endpoint: "news",
+          queries: { limit: 4 }, // 最新の4件を取得
+        });
+        setArticles(contents);
+      } catch (err) {
+        console.error("Error fetching news articles:", err);
+        setError("お知らせの取得中にエラーが発生しました。");
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchArticles();
+  }, []);
+
+  if (loading) {
+    return (
+      <section className="py-20 bg-gray-100">
+        <div className="container mx-auto px-6 text-center">
+          <p className="text-gray-500">お知らせを読み込んでいます...</p>
+        </div>
+      </section>
+    );
+  }
+
+  if (error) {
+    return (
+      <section className="py-20 bg-gray-100">
+        <div className="container mx-auto px-6 text-center">
+          <p className="text-red-600">{error}</p>
+        </div>
+      </section>
+    );
+  }
+
   return (
-    <section className="py-20 bg-gradient-to-br from-blue-50 via-white to-gray-50">
+    <section className="py-20 bg-gray-50">
       <div className="container mx-auto px-6">
         <h2 className="text-4xl font-extrabold text-center mb-16 text-gray-800 tracking-wide">
           最新のお知らせ
         </h2>
-        <div className="grid md:grid-cols-2 gap-10 max-w-6xl mx-auto">
-          {/* Winter Course Card */}
-          <Card className="shadow-lg transform hover:scale-105 transition duration-300">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-3 text-xl text-gray-800">
-                <Calendar className="w-6 h-6 text-blue-600" />
-                2024年冬期講習会
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ul className="space-y-4">
-                <li>
-                  <a
-                    href="#"
-                    className="text-blue-700 hover:text-blue-500 font-medium underline underline-offset-4 transition"
-                  >
-                    冬期講習会のご案内・お申込みフォーム
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="#"
-                    className="text-blue-700 hover:text-blue-500 font-medium underline underline-offset-4 transition"
-                  >
-                    弘高特訓・進学特訓コース２週間体験のご案内
-                  </a>
-                </li>
-              </ul>
-            </CardContent>
-          </Card>
-
-          {/* Top Exam Card */}
-          <Card className="shadow-lg transform hover:scale-105 transition duration-300">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-3 text-xl text-gray-800">
-                <BookOpen className="w-6 h-6 text-green-600" />
-                第３回トップ定期試験
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <p className="text-gray-700">
-                  <strong>実施日程：</strong>
-                </p>
-                <ul className="list-disc list-inside space-y-2">
-                  <li className="text-gray-700">中３生：11月9日（土）</li>
-                  <li className="text-gray-700">中１、２生：11月16日（土）</li>
-                </ul>
+        <div className="space-y-8 max-w-4xl mx-auto">
+          {articles.map((article) => (
+            <Card
+              key={article.id}
+              className="flex flex-col md:flex-row items-start gap-6 shadow-md transition-transform duration-300 bg-white rounded-lg border border-gray-200 p-6 hover:scale-105"
+            >
+              <div className="flex-shrink-0">
+                <Calendar className="w-12 h-12 text-blue-500" />
               </div>
-            </CardContent>
-          </Card>
+              <div className="flex-1">
+                <CardHeader>
+                  <CardTitle className="text-2xl font-semibold text-gray-800">
+                    {article.title}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div
+                    className="text-gray-600 line-clamp-3"
+                    dangerouslySetInnerHTML={{ __html: article.content }}
+                  />
+                </CardContent>
+                <div className="mt-4">
+                  <Link
+                    href={`/news/${article.id}`}
+                    className="text-blue-600 hover:text-blue-400 font-medium underline underline-offset-4 transition"
+                  >
+                    続きを読む →
+                  </Link>
+                </div>
+              </div>
+            </Card>
+          ))}
         </div>
-
-        
+        <div className="mt-16 text-center">
+          <Link href="/news">
+            <button className="px-6 py-3 bg-blue-600 text-white font-bold text-lg rounded-lg shadow hover:bg-blue-500 transition">
+              全てのお知らせを見る
+            </button>
+          </Link>
+        </div>
       </div>
     </section>
   );
