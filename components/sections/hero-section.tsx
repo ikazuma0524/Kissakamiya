@@ -4,354 +4,341 @@ import { FC, useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { motion } from 'framer-motion';
 
-export const HeroSection: FC = () => {
-  // 画面幅をチェックしてモバイル判定
-  const [isMobile, setIsMobile] = useState(false);
+
+
+
+
+
+
+
+
+
+const GeometricAnimation: FC = () => {
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-    handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-  
-  // GlitchImageコンポーネント
-  const GlitchImage: FC<{
-    imageSrc: string;
-    intensity?: number; // 0-1
-    frequency?: number; // 0-1
-    glitchTypes?: ('rgb' | 'line' | 'noise')[];
-  }> = ({
-    imageSrc,
-    intensity = 1,
-    frequency = 1,
-    glitchTypes = ['rgb', 'line', 'noise'],
-  }) => {
-    const containerRef = useRef<HTMLDivElement>(null);
-    const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+    if (!containerRef.current) return;
 
-    useEffect(() => {
-      if (!containerRef.current) return;
+    const width = containerRef.current.clientWidth;
+    const height = containerRef.current.clientHeight;
 
-      const scene = new THREE.Scene();
-      const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
-      camera.position.z = 1;
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0xffffff);
 
-      const renderer = new THREE.WebGLRenderer({ alpha: true });
-      containerRef.current.appendChild(renderer.domElement);
+    const camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
+    camera.position.z = 3; // 近くして図形を大きく見せる
+    camera.lookAt(0, 0, 0);
 
-      const textureLoader = new THREE.TextureLoader();
-      const texture = textureLoader.load(imageSrc);
+    const renderer = new THREE.WebGLRenderer({
+      alpha: true,
+      antialias: true,
+      canvas: document.createElement('canvas')
+    });
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.setSize(width, height);
+    containerRef.current.appendChild(renderer.domElement);
 
-      const vertexShader = `
-        varying vec2 vUv;
-        void main() {
-          vUv = uv;
-          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+    const lineMaterial = new THREE.LineBasicMaterial({ color: 0x000000 });
+
+    // シンプルなメビウス帯的な曲面を描くパラメトリックライン
+    const uSegments = 200;
+    const vSegments = 30;
+    const uMin = 0, uMax = 2 * Math.PI;
+    const vMin = -1, vMax = 1;
+
+    const uLines: THREE.LineLoop[] = [];
+    const vLines: THREE.LineLoop[] = [];
+
+    for (let i = 0; i <= uSegments; i++) {
+      const geometry = new THREE.BufferGeometry();
+      const positions = new Float32Array((vSegments + 1) * 3);
+      geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+      const line = new THREE.LineLoop(geometry, lineMaterial);
+      uLines.push(line);
+      scene.add(line);
+    }
+
+    for (let j = 0; j <= vSegments; j++) {
+      const geometry = new THREE.BufferGeometry();
+      const positions = new Float32Array((uSegments + 1) * 3);
+      geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+      const line = new THREE.LineLoop(geometry, lineMaterial);
+      vLines.push(line);
+      scene.add(line);
+    }
+
+    let time = 0;
+    let animationFrameId: number;
+
+    const animate = () => {
+      animationFrameId = requestAnimationFrame(animate);
+      time += 0.07; // 変化を速く
+
+      // ベースとなる半径をやや大きくし、波を強めて流動的に
+      const baseR = 1.5;
+      const waveAmp = 0.4; // 波の振幅
+      const waveFreq = 5.0; // 波の周波数を上げて速い変化を演出
+      const verticalWave = 0.3; // 縦方向の変動
+
+      // u固定ライン更新
+      uLines.forEach((line, i) => {
+        const positions = line.geometry.getAttribute('position') as THREE.BufferAttribute;
+        const count = positions.count;
+        const u = uMin + (uMax - uMin) * (i / uSegments);
+        for (let k = 0; k < count; k++) {
+          const v = vMin + (vMax - vMin) * (k / vSegments);
+          // 波の計算
+          const wave = waveAmp * Math.sin(time + u * waveFreq + v * waveFreq);
+          const R = baseR + (v * 0.5) * Math.cos(u / 2 + wave);
+          const x = R * Math.cos(u);
+          const y = R * Math.sin(u);
+          const z = v * Math.sin(u / 2) * verticalWave + wave * 0.5;
+
+          positions.setXYZ(k, x, y, z);
         }
-      `;
-
-      const fragmentShader = `
-        uniform sampler2D tDiffuse;
-        uniform float time;
-        uniform float intensity;
-        uniform float frequency;
-        uniform int activeEffect;
-        uniform float mouseX;
-        uniform float mouseY;
-        varying vec2 vUv;
-
-        float random(vec2 c) {
-          return fract(sin(dot(c.xy, vec2(12.9898,78.233))) * 43758.5453);
-        }
-
-        vec4 rgbShift(vec2 uv) {
-          float noise = random(uv * time) * intensity;
-          float r = texture2D(tDiffuse, uv + vec2(noise * 0.02, 0.0)).r;
-          float g = texture2D(tDiffuse, uv).g;
-          float b = texture2D(tDiffuse, uv - vec2(noise * 0.02, 0.0)).b;
-          return vec4(r, g, b, 1.0);
-        }
-
-        vec4 lineGlitch(vec2 uv) {
-          float line = step(0.99, random(vec2(time * frequency, uv.y)));
-          vec2 offset = vec2(0.02 * intensity * random(vec2(time)), 0.0) * line;
-          return texture2D(tDiffuse, uv + offset);
-        }
-
-        vec4 noiseGlitch(vec2 uv) {
-          float n = random(uv * time * 100.0) * intensity;
-          vec4 color = texture2D(tDiffuse, uv);
-          return vec4(color.rgb + vec3(n), 1.0);
-        }
-
-        void main() {
-          vec2 uv = vUv;
-          uv += vec2((mouseX - 0.5) * 0.02, (mouseY - 0.5) * 0.02);
-
-          vec4 color;
-          if (activeEffect == 0) {
-            color = rgbShift(uv);
-          } else if (activeEffect == 2) {
-            color = lineGlitch(uv);
-          } else if (activeEffect == 3) {
-            color = noiseGlitch(uv);
-          } else {
-            color = texture2D(tDiffuse, uv);
-          }
-          gl_FragColor = color;
-        }
-      `;
-
-      const material = new THREE.ShaderMaterial({
-        uniforms: {
-          tDiffuse: { value: texture },
-          time: { value: 0 },
-          intensity: { value: intensity },
-          frequency: { value: frequency },
-          activeEffect: { value: -1 },
-          mouseX: { value: 0.5 },
-          mouseY: { value: 0.5 },
-        },
-        vertexShader,
-        fragmentShader,
-        transparent: true,
+        positions.needsUpdate = true;
       });
 
-      const geometry = new THREE.PlaneGeometry(2, 2);
-      const mesh = new THREE.Mesh(geometry, material);
-      scene.add(mesh);
+      // v固定ライン更新
+      vLines.forEach((line, j) => {
+        const positions = line.geometry.getAttribute('position') as THREE.BufferAttribute;
+        const count = positions.count;
+        const v = vMin + (vMax - vMin) * (j / vSegments);
+        for (let k = 0; k < count; k++) {
+          const u = uMin + (uMax - uMin) * (k / uSegments);
+          const wave = waveAmp * Math.sin(time + u * waveFreq + v * waveFreq);
+          const R = baseR + (v * 0.5) * Math.cos(u / 2 + wave);
+          const x = R * Math.cos(u);
+          const y = R * Math.sin(u);
+          const z = v * Math.sin(u / 2) * verticalWave + wave * 0.5;
 
-      const handleResize = () => {
-        if (!containerRef.current) return;
-        const { clientWidth, clientHeight } = containerRef.current;
-        renderer.setSize(clientWidth, clientHeight);
-      };
-
-      handleResize();
-      window.addEventListener('resize', handleResize);
-
-      const applyRandomEffect = () => {
-        if (Math.random() > frequency) {
-          material.uniforms.activeEffect.value = -1;
-        } else {
-          const effectIndex = Math.floor(Math.random() * glitchTypes.length);
-          material.uniforms.activeEffect.value = effectIndex;
+          positions.setXYZ(k, x, y, z);
         }
-        const nextChangeTime = 100 + Math.random() * 500;
-        timeoutRef.current = setTimeout(applyRandomEffect, nextChangeTime);
-      };
-      applyRandomEffect();
+        positions.needsUpdate = true;
+      });
 
-      const handleMouseMove = (e: MouseEvent) => {
-        const rect = containerRef.current?.getBoundingClientRect();
-        if (!rect) return;
-        const x = (e.clientX - rect.left) / rect.width;
-        const y = (e.clientY - rect.top) / rect.height;
-        material.uniforms.mouseX.value = x;
-        material.uniforms.mouseY.value = y;
-      };
-      window.addEventListener('mousemove', handleMouseMove);
+      // カメラを一周ゆっくりぐるっと回転する感じ
+const radius = 2.5; // カメラが回る半径
+const horizontalSpeed = 0.05; // カメラが一周する速さ（小さいほどゆっくり）
+const verticalWaveSpeed = 0.1; 
+const verticalWaveAmp = 0.3;
 
-      let animationFrameId: number;
-      const animate = () => {
-        animationFrameId = requestAnimationFrame(animate);
-        material.uniforms.time.value += 0.01;
-        renderer.render(scene, camera);
-      };
-      animate();
+camera.position.x = Math.sin(time * horizontalSpeed) * radius;
+camera.position.z = Math.cos(time * horizontalSpeed) * radius;
+camera.position.y = 0.5 + Math.cos(time * verticalWaveSpeed) * verticalWaveAmp;
+camera.lookAt(0, 0, 0);
 
-      return () => {
-        if (timeoutRef.current) clearTimeout(timeoutRef.current);
-        window.removeEventListener('resize', handleResize);
-        window.removeEventListener('mousemove', handleMouseMove);
-        cancelAnimationFrame(animationFrameId);
-        containerRef.current?.removeChild(renderer.domElement);
-        geometry.dispose();
-        material.dispose();
-        texture.dispose();
-        renderer.dispose();
-      };
-    }, [imageSrc, intensity, frequency, glitchTypes]);
+renderer.render(scene, camera);
 
-    return <div ref={containerRef} className="absolute inset-0 z-0 h-full w-full" />;
-  };
 
-  // TextAnimatorコンポーネント
-  const TextAnimator: FC<{
-    className?: string;
-    targetText: string;
-    duration?: number;
-    delay?: number;
-  }> = ({ className, targetText, duration = 500, delay = 0 }) => {
-    const ref = useRef<HTMLSpanElement>(null);
-    const intervalMs = 5;
-    const probability = (targetText.length / duration) * intervalMs;
-    const characters = 'abcdefghijklmnopqrstuvwxyz ';
+      renderer.render(scene, camera);
+    };
 
-    useEffect(() => {
-      let currentIndex = 0;
-      let currentText = Array(targetText.length).fill(' ');
+    animate();
 
-      const startAnimation = () => {
-        const interval = setInterval(() => {
-          if (currentIndex >= targetText.length) {
-            clearInterval(interval);
-            return;
-          }
-          const targetChar = targetText[currentIndex];
-          const random = Math.random();
-          if (random < probability) {
-            currentText[currentIndex] = targetChar;
-            currentIndex++;
-          } else {
-            currentText[currentIndex] =
-              characters[Math.floor(random * characters.length)];
-          }
-          if (ref.current) {
-            ref.current.textContent = currentText.join('');
-          }
-        }, intervalMs);
-      };
+    const handleResize = () => {
+      if (!containerRef.current) return;
+      const w = containerRef.current.clientWidth;
+      const h = containerRef.current.clientHeight;
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+      renderer.setSize(w, h);
+    };
 
-      const timeout = setTimeout(startAnimation, delay);
-      return () => {
-        clearTimeout(timeout);
-      };
-    }, [targetText, duration, delay]);
+    window.addEventListener('resize', handleResize);
 
-    return <span className={className} ref={ref} />;
-  };
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      cancelAnimationFrame(animationFrameId);
+
+      if (containerRef.current?.contains(renderer.domElement)) {
+        containerRef.current.removeChild(renderer.domElement);
+      }
+
+      uLines.forEach(line => {
+        scene.remove(line);
+        line.geometry.dispose();
+      });
+
+      vLines.forEach(line => {
+        scene.remove(line);
+        line.geometry.dispose();
+      });
+
+      renderer.dispose();
+    };
+  }, []);
 
   return (
-    <section
-      className="relative min-h-screen flex items-end pb-20 bg-black"
-      style={{
-        fontFamily: "'Montserrat', sans-serif",
-        position: 'relative',
-      }}
-    >
-      {/* グリッチ背景 */}
-      <GlitchImage
-        imageSrc="/topseminar.jpg"
-        intensity={0.95}
-        frequency={0.7}
-        glitchTypes={['rgb', 'noise']}
-      />
+    <div
+      ref={containerRef}
+      className="w-full h-screen relative bg-white"
+      style={{ minHeight: '100vh' }}
+    />
+  );
+};
 
-      {/* オーバーレイと粒子 */}
-      <div
-        className="absolute inset-0 z-5 pointer-events-none"
-        style={{
-          background:
-            "linear-gradient(to bottom, transparent, rgba(0,0,0,0.6) 90%)",
-          mixBlendMode: "multiply",
-        }}
-      ></div>
-      <div
-        className="absolute inset-0 z-5 pointer-events-none"
-        style={{
-          backgroundImage: `radial-gradient(rgba(255,255,255,0.02) 1px, transparent 1px)`,
-          backgroundSize: "3px 3px",
-          opacity: 0.2,
-        }}
-      ></div>
+export default GeometricAnimation;
 
-      <div className="relative z-10 w-full flex flex-col md:flex-row justify-between items-center md:items-end px-5 md:px-10 gap-5 md:gap-10">
-        {/* 左カラム */}
-        <div className="flex flex-col space-y-6 text-left max-w-xl w-full">
-          {/* タイトル */}
-          <motion.div
-            initial={{ opacity: 0, x: -30 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 1.5, ease: 'easeOut' }}
-            className="text-4xl md:text-7xl font-extrabold leading-tight text-white whitespace-nowrap relative"
-            style={{
-              textShadow: '0 0 20px rgba(0,200,255,0.5)',
-            }}
-          >
-            <div className="relative inline-block">
-              <span
-                style={{
-                  background: 'linear-gradient(90deg, #89cff0, #b3ecff)',
-                  WebkitBackgroundClip: 'text',
-                  color: 'transparent',
-                }}
-              >
-                <TextAnimator targetText="弘前トップゼミナール" duration={1500} delay={500} />
-              </span>
-              <span
-                className="absolute inset-0"
-                style={{
-                  background:
-                    'radial-gradient(circle at 50% 50%, rgba(255,255,255,0.1), transparent 70%)',
-                  mixBlendMode: 'screen',
-                  pointerEvents: 'none',
-                }}
-              ></span>
-            </div>
-          </motion.div>
 
-          {/* サブタイトル */}
-          <motion.div
-            initial={{ opacity: 0, x: -30 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 2, delay: 1, ease: 'easeOut' }}
-            className="text-xl md:text-4xl font-semibold text-blue-200"
-          >
-            <TextAnimator
-              targetText="Practice Makes Perfect"
-              duration={2000}
-              delay={1000}
-            />
-          </motion.div>
 
-          {/* キャッチコピー */}
-          <motion.div
-            initial={{ opacity: 0, x: -30 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 2.5, delay: 1.5, ease: 'easeOut' }}
-            className="text-lg md:text-2xl font-medium text-blue-100 leading-relaxed"
-          >
-            <TextAnimator
-              targetText="弘前で最高の学習環境を提供するために"
-              duration={2000}
-              delay={1000}
-            />
-          </motion.div>
 
-          {/* 令和5年度入試実績 */}
-          <motion.div
-            initial={{ opacity: 0, x: -30 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 2.5, delay: 2, ease: 'easeOut' }}
-            className="leading-snug space-y-2 text-sm md:text-base"
-          >
-            <div className="text-lg md:text-2xl font-bold text-blue-100">
-              <TextAnimator
-                targetText="令和5年度入試実績"
-                duration={2000}
-                delay={1200}
-              />
-            </div>
-            <div className="font-semibold text-white">
-              <TextAnimator
-                targetText="弘前高校 39人"
-                duration={2000}
-                delay={1400}
-              />
-            </div>
-            <div className="font-semibold text-white">
-              <TextAnimator
-                targetText="弘前大学教育学部附属中学校 25人(内部＋外部)"
-                duration={2000}
-                delay={1600}
-              />
-            </div>
-          </motion.div>
-        </div>
+
+
+
+
+
+
+
+
+
+
+const TextAnimator: FC<{
+  className?: string;
+  targetText: string;
+  duration?: number;
+  delay?: number;
+}> = ({ className, targetText, duration = 500, delay = 0 }) => {
+  const ref = useRef<HTMLSpanElement>(null);
+  const intervalMs = 5;
+  const probability = (targetText.length / duration) * intervalMs;
+  const characters = 'abcdefghijklmnopqrstuvwxyz ';
+
+  useEffect(() => {
+    let currentIndex = 0;
+    let currentText = Array(targetText.length).fill(' ');
+    let intervalId: NodeJS.Timeout;
+
+    const startAnimation = () => {
+      intervalId = setInterval(() => {
+        if (currentIndex >= targetText.length) {
+          clearInterval(intervalId);
+          return;
+        }
+        const targetChar = targetText[currentIndex];
+        const random = Math.random();
+        if (random < probability) {
+          currentText[currentIndex] = targetChar;
+          currentIndex++;
+        } else {
+          currentText[currentIndex] =
+            characters[Math.floor(random * characters.length)];
+        }
+        if (ref.current) {
+          ref.current.textContent = currentText.join('');
+        }
+      }, intervalMs);
+    };
+
+    const timeoutId = setTimeout(startAnimation, delay);
+    
+    return () => {
+      clearTimeout(timeoutId);
+      clearInterval(intervalId);
+    };
+  }, [targetText, duration, delay]);
+
+  return <span className={className} ref={ref} />;
+};
+
+export const HeroSection: FC = () => {
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [isMobile, setIsMobile] = useState(true);
+
+  useEffect(() => {
+    const checkScreenSize = () => {
+      const mobile = window.innerWidth < 768;
+      setIsMobile(mobile);
+    };
+
+    checkScreenSize();
+    window.addEventListener('resize', checkScreenSize);
+    return () => window.removeEventListener('resize', checkScreenSize);
+  }, []);
+
+  useEffect(() => {
+    setTimeout(() => {
+      setIsLoaded(true);
+    }, 500);
+  }, []);
+
+  if (isMobile) {
+    // モバイル専用画面、テキストもアニメーションで表示
+    return (
+      <div className="w-full md:w-1/2 h-screen flex flex-col justify-center items-start p-2 md:p-10 bg-white">
+  <motion.div
+    initial={{ opacity: 0, x: 20 }}
+    animate={{ opacity: isLoaded ? 1 : 0, x: isLoaded ? 0 : 20 }}
+    transition={{ duration: 1, ease: 'easeOut' }}
+    className="mb-6 md:mb-10"
+  >
+    <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-4">
+      <TextAnimator targetText="Practice Makes Perfect" duration={2000} delay={600} />
+    </h1>
+    <div className="text-lg md:text-2xl font-medium text-gray-800 mt-2 md:mt-4">
+      <TextAnimator targetText="弘前で最高の学習環境を提供するために" duration={2000} delay={1000} />
+    </div>
+  </motion.div>
+
+  <motion.div
+    initial={{ opacity: 0, x: 20 }}
+    animate={{ opacity: isLoaded ? 1 : 0, x: isLoaded ? 0 : 20 }}
+    transition={{ duration: 1, ease: 'easeOut', delay: 1.5 }}
+    className="space-y-3 md:space-y-4"
+  >
+    <h2 className="text-2xl md:text-3xl font-semibold text-gray-800 mb-2 md:mb-4">
+      <TextAnimator targetText="令和5年度　実績" duration={2000} delay={1200} />
+    </h2>
+    <ul className="text-lg md:text-2xl text-gray-800 font-medium space-y-2">
+      <li>
+        <TextAnimator targetText="弘前高校 39人合格" duration={2000} delay={1400} />
+      </li>
+      <li>
+        <TextAnimator targetText="弘前大学教育学部附属中学校 25人合格" duration={2000} delay={1600} />
+      </li>
+    </ul>
+  </motion.div>
+</div>
+    );
+  }
+      
+
+  // PC版
+  return (
+    <section className="flex flex-row w-full overflow-hidden">
+      <div className="w-1/2 h-screen">
+        <GeometricAnimation />
+      </div>
+      
+      <div className="w-1/2 h-screen flex flex-col justify-center items-start p-10 bg-white">
+        <motion.div
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: isLoaded ? 1 : 0, x: isLoaded ? 0 : 20 }}
+          transition={{ duration: 1, ease: 'easeOut' }}
+          className="mb-10"
+        >
+          <h1 className="text-6xl font-bold text-gray-900 mb-4">
+            <TextAnimator targetText="Practice Makes Perfect" duration={2000} delay={600} />
+          </h1>
+          <div className="text-2xl font-medium text-gray-800 mt-4">
+            <TextAnimator targetText="弘前で最高の学習環境を提供するために" duration={2000} delay={1000} />
+          </div>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: isLoaded ? 1 : 0, x: isLoaded ? 0 : 20 }}
+          transition={{ duration: 1, ease: 'easeOut', delay: 1.5 }}
+          className="space-y-4"
+        >
+          <h2 className="text-3xl font-semibold text-gray-800 mb-4">
+            <TextAnimator targetText="令和5年度　実績" duration={2000} delay={1200} />
+          </h2>
+          <ul className="text-2xl text-gray-800 font-medium space-y-2">
+            <li><TextAnimator targetText="弘前高校 39人合格" duration={2000} delay={1400} /></li>
+            <li><TextAnimator targetText="弘前大学教育学部附属中学校 25人合格" duration={2000} delay={1600} /></li>
+          </ul>
+        </motion.div>
       </div>
     </section>
   );
