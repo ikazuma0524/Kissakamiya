@@ -23,7 +23,7 @@ export function NewsSection() {
       try {
         const { contents } = await client.get<{ contents: Article[] }>({
           endpoint: "news",
-          queries: { limit: 4 }, // 最新の4件を取得
+          queries: { limit: 4 },
         });
         setArticles(contents);
       } catch (err) {
@@ -38,9 +38,9 @@ export function NewsSection() {
 
   if (loading) {
     return (
-      <section className="py-20 bg-gray-100">
+      <section className="py-20 bg-white">
         <div className="container mx-auto px-6 text-center">
-          <p className="text-gray-500">お知らせを読み込んでいます...</p>
+          <p className="text-black opacity-70">お知らせを読み込んでいます...</p>
         </div>
       </section>
     );
@@ -48,45 +48,45 @@ export function NewsSection() {
 
   if (error) {
     return (
-      <section className="py-20 bg-gray-100">
+      <section className="py-20 bg-white">
         <div className="container mx-auto px-6 text-center">
-          <p className="text-red-600">{error}</p>
+          <p className="text-black opacity-70">{error}</p>
         </div>
       </section>
     );
   }
 
   return (
-    <section className="py-20 bg-gray-50">
+    <section className="py-20 bg-white">
       <div className="container mx-auto px-6">
-        <h2 className="text-4xl font-extrabold text-center mb-16 text-gray-800 tracking-wide">
+        <h2 className="text-4xl font-extrabold text-center mb-16 text-black tracking-wide">
           最新のお知らせ
         </h2>
         <div className="space-y-8 max-w-4xl mx-auto">
           {articles.map((article) => (
             <Card
               key={article.id}
-              className="flex flex-col md:flex-row items-start gap-6 shadow-md transition-transform duration-300 bg-white rounded-lg border border-gray-200 p-6 hover:scale-105"
+              className="flex flex-col md:flex-row items-start gap-6 bg-white border border-gray-300 p-6 transition-transform duration-300 hover:opacity-90"
             >
-              <div className="flex-shrink-0">
-                <Calendar className="w-12 h-12 text-blue-500" />
+              <div className="flex-shrink-0 text-black">
+                <Calendar className="w-8 h-8" />
               </div>
               <div className="flex-1">
-                <CardHeader>
-                  <CardTitle className="text-2xl font-semibold text-gray-800">
+                <CardHeader className="p-0">
+                  <CardTitle className="text-2xl font-semibold text-black">
                     {article.title}
                   </CardTitle>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="p-0 mt-2">
                   <div
-                    className="text-gray-600 line-clamp-3"
+                    className="text-black text-sm md:text-base line-clamp-3 leading-relaxed"
                     dangerouslySetInnerHTML={{ __html: article.content }}
                   />
                 </CardContent>
                 <div className="mt-4">
                   <Link
                     href={`/news/${article.id}`}
-                    className="text-blue-600 hover:text-blue-400 font-medium underline underline-offset-4 transition"
+                    className="text-black underline underline-offset-4 hover:opacity-75"
                   >
                     続きを読む →
                   </Link>
@@ -97,7 +97,7 @@ export function NewsSection() {
         </div>
         <div className="mt-16 text-center">
           <Link href="/news">
-            <button className="px-6 py-3 bg-blue-600 text-white font-bold text-lg rounded-lg shadow hover:bg-blue-500 transition">
+            <button className="px-6 py-3 bg-black text-white font-bold text-lg rounded-sm hover:opacity-75 transition">
               全てのお知らせを見る
             </button>
           </Link>

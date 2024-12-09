@@ -7,7 +7,7 @@ import Link from "next/link";
 
 export function CoursesSection() {
   return (
-    <section className="py-20 bg-gradient-to-br from-gray-50 to-gray-100" id="courses">
+    <section className="py-20 bg-white" id="courses">
       <div className="container mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -17,15 +17,15 @@ export function CoursesSection() {
           className="max-w-6xl mx-auto space-y-12"
         >
           <div className="text-center space-y-4">
-            <h2 className="text-4xl font-bold">コース紹介</h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            <h2 className="text-4xl font-bold text-black">コース紹介</h2>
+            <p className="text-xl text-gray-700 max-w-3xl mx-auto">
               地方と中央の教育格差を解消し、生徒一人一人の目標に合わせた多彩なコースをご用意しています。
             </p>
           </div>
 
           {/* 各コース */}
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {/* S-TOPコース */}
+            {/* S-TOPコース (変更なし) */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -55,13 +55,15 @@ export function CoursesSection() {
               transition={{ duration: 0.6, delay: 0.1 }}
             >
               <Link href="/courses/normal">
-                <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+                <Card className="bg-white border border-gray-300 hover:shadow-lg transition-transform hover:-translate-y-1 cursor-pointer">
                   <CardContent className="p-8 space-y-4">
-                    <h3 className="text-2xl font-bold">通常授業</h3>
-                    <p className="text-gray-600">
+                    <h3 className="text-2xl font-bold text-black">通常授業</h3>
+                    <p className="text-gray-700">
                       附属中入試に対応する基礎から応用までを学べるクラスです。
                     </p>
-                    <Button className="w-full">詳細を見る</Button>
+                    <Button className="w-full bg-black text-white hover:opacity-80">
+                      詳細を見る
+                    </Button>
                   </CardContent>
                 </Card>
               </Link>
@@ -75,13 +77,15 @@ export function CoursesSection() {
               transition={{ duration: 0.6, delay: 0.2 }}
             >
               <Link href="/courses/weekend">
-                <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+                <Card className="bg-white border border-gray-300 hover:shadow-lg transition-transform hover:-translate-y-1 cursor-pointer">
                   <CardContent className="p-8 space-y-4">
-                    <h3 className="text-2xl font-bold">土日附中入試コース</h3>
-                    <p className="text-gray-600">
+                    <h3 className="text-2xl font-bold text-black">土日附中入試コース</h3>
+                    <p className="text-gray-700">
                       土日を利用して集中的に附属中入試対策を行うコースです。
                     </p>
-                    <Button className="w-full">詳細を見る</Button>
+                    <Button className="w-full bg-black text-white hover:opacity-80">
+                      詳細を見る
+                    </Button>
                   </CardContent>
                 </Card>
               </Link>
@@ -95,13 +99,15 @@ export function CoursesSection() {
               transition={{ duration: 0.6, delay: 0.3 }}
             >
               <Link href="/courses/hirotoku">
-                <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+                <Card className="bg-white border border-gray-300 hover:shadow-lg transition-transform hover:-translate-y-1 cursor-pointer">
                   <CardContent className="p-8 space-y-4">
-                    <h3 className="text-2xl font-bold">弘高特訓コース</h3>
-                    <p className="text-gray-600">
+                    <h3 className="text-2xl font-bold text-black">弘高特訓コース</h3>
+                    <p className="text-gray-700">
                       弘前高校合格を目指すための特別カリキュラムを提供します。
                     </p>
-                    <Button className="w-full">詳細を見る</Button>
+                    <Button className="w-full bg-black text-white hover:opacity-80">
+                      詳細を見る
+                    </Button>
                   </CardContent>
                 </Card>
               </Link>
@@ -115,13 +121,15 @@ export function CoursesSection() {
               transition={{ duration: 0.6, delay: 0.4 }}
             >
               <Link href="/courses/junior-final">
-                <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+                <Card className="bg-white border border-gray-300 hover:shadow-lg transition-transform hover:-translate-y-1 cursor-pointer">
                   <CardContent className="p-8 space-y-4">
-                    <h3 className="text-2xl font-bold">中三受験対策コース</h3>
-                    <p className="text-gray-600">
+                    <h3 className="text-2xl font-bold text-black">中三受験対策コース</h3>
+                    <p className="text-gray-700">
                       中学3年生のための受験対策に特化したプログラムです。
                     </p>
-                    <Button className="w-full">詳細を見る</Button>
+                    <Button className="w-full bg-black text-white hover:opacity-80">
+                      詳細を見る
+                    </Button>
                   </CardContent>
                 </Card>
               </Link>

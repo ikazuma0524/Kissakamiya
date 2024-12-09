@@ -60,13 +60,18 @@ export function FacultySection() {
     <section className="py-20 bg-white" id="faculty">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-center gap-3 mb-12">
-          <Users className="w-8 h-8 text-blue-600" />
-          <h2 className="text-3xl font-bold text-center">講師紹介</h2>
+          <Users className="w-8 h-8 text-black" />
+          <h2 className="text-3xl font-bold text-black text-center tracking-wide">
+            講師紹介
+          </h2>
         </div>
         
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
           {teachers.map((teacher, index) => (
-            <Card key={index} className="hover:shadow-lg transition-shadow group">
+            <Card 
+              key={index} 
+              className="bg-white border border-gray-300 hover:shadow-lg transition-shadow transform hover:-translate-y-1 group"
+            >
               <CardContent className="p-6">
                 <div className="text-center space-y-4">
                   <div className="relative w-32 h-32 mx-auto mb-4 rounded-full overflow-hidden">
@@ -74,19 +79,19 @@ export function FacultySection() {
                       src={teacher.image}
                       alt={teacher.name}
                       fill
-                      className="object-cover group-hover:scale-110 transition-transform duration-300"
+                      className="object-cover group-hover:scale-105 transition-transform duration-300"
                       sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                     />
                   </div>
                   <div>
-                    <h3 className="text-xl font-semibold text-gray-900">{teacher.name}</h3>
-                    <p className="text-blue-600 font-medium mt-1">{teacher.role}</p>
+                    <h3 className="text-xl font-semibold text-black">{teacher.name}</h3>
+                    <p className="text-black font-normal mt-1">{teacher.role}</p>
                   </div>
-                  <div className="space-y-2">
-                    <p className="text-gray-600 text-sm">{teacher.experience}</p>
-                    <p className="text-gray-600 text-sm">{teacher.specialty}</p>
+                  <div className="space-y-1">
+                    <p className="text-gray-700 text-sm">{teacher.experience}</p>
+                    <p className="text-gray-700 text-sm">{teacher.specialty}</p>
                   </div>
-                  <p className="text-gray-700 text-sm italic border-t border-gray-100 pt-4 mt-4">
+                  <p className="text-gray-700 text-sm italic border-t border-gray-200 pt-4 mt-4 leading-relaxed">
                     &quot;{teacher.message}&quot;
                   </p>
                 </div>

@@ -51,7 +51,7 @@ const results = {
 
 export function ResultsSection() {
   return (
-    <section className="py-20 bg-gradient-to-b from-blue-50 via-white to-gray-50" id="results">
+    <section className="py-20 bg-white" id="results">
       <div className="container mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -61,29 +61,29 @@ export function ResultsSection() {
           className="space-y-12 max-w-6xl mx-auto"
         >
           <div className="text-center space-y-4">
-            <h2 className="text-4xl font-extrabold text-gray-800">合格実績</h2>
-            <p className="text-lg text-gray-600">
+            <h2 className="text-4xl font-extrabold text-black">合格実績</h2>
+            <p className="text-lg text-gray-700">
               地域でトップクラスの進学実績を誇り、全国的な難関校にも合格者を輩出しています。
             </p>
           </div>
 
           {/* 最新の実績 */}
           <div className="grid md:grid-cols-2 gap-8">
-            <Card className="shadow-lg bg-gradient-to-tr from-blue-100 to-blue-200">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Trophy className="w-6 h-6 text-blue-700" />
+            <Card className="bg-white border border-gray-300 hover:shadow-lg hover:-translate-y-1 transition-transform p-4">
+              <CardHeader className="p-0 mb-4">
+                <CardTitle className="flex items-center gap-2 text-black">
+                  <Trophy className="w-6 h-6 text-black" />
                   {results.current.year}入試実績
                 </CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="p-0 space-y-4">
                 <ul className="space-y-4">
                   {results.current.achievements.map((achievement, index) => (
-                    <li key={index} className="flex flex-col">
+                    <li key={index} className="flex flex-col text-black">
                       <span className="font-semibold">{achievement.name}</span>
-                      <span className="text-2xl font-bold text-blue-600">{achievement.count}名</span>
+                      <span className="text-2xl font-bold">{achievement.count}名</span>
                       {achievement.note && (
-                        <p className="text-sm text-gray-600">{achievement.note}</p>
+                        <p className="text-sm text-gray-700">{achievement.note}</p>
                       )}
                     </li>
                   ))}
@@ -91,21 +91,21 @@ export function ResultsSection() {
               </CardContent>
             </Card>
 
-            <Card className="shadow-lg bg-gradient-to-tr from-green-100 to-green-200">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <GraduationCap className="w-6 h-6 text-green-700" />
+            <Card className="bg-white border border-gray-300 hover:shadow-lg hover:-translate-y-1 transition-transform p-4">
+              <CardHeader className="p-0 mb-4">
+                <CardTitle className="flex items-center gap-2 text-black">
+                  <GraduationCap className="w-6 h-6 text-black" />
                   {results.previous.year}入試実績
                 </CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="p-0 space-y-4">
                 <ul className="space-y-4">
                   {results.previous.achievements.map((achievement, index) => (
-                    <li key={index} className="flex flex-col">
+                    <li key={index} className="flex flex-col text-black">
                       <span className="font-semibold">{achievement.name}</span>
-                      <span className="text-2xl font-bold text-green-600">{achievement.count}名</span>
+                      <span className="text-2xl font-bold">{achievement.count}名</span>
                       {achievement.note && (
-                        <p className="text-sm text-gray-600">{achievement.note}</p>
+                        <p className="text-sm text-gray-700">{achievement.note}</p>
                       )}
                     </li>
                   ))}
@@ -115,21 +115,21 @@ export function ResultsSection() {
           </div>
 
           {/* 大学実績 */}
-          <Card className="shadow-lg bg-gradient-to-br from-blue-800 to-blue-900 text-white">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <School className="w-6 h-6 text-white" />
-                {results.current.year}大学合格実績（国立大学）
+          <Card className="bg-white border border-gray-300 hover:shadow-lg hover:-translate-y-1 transition-transform p-4">
+            <CardHeader className="p-0 mb-4">
+              <CardTitle className="flex items-center gap-2 text-black">
+                <School className="w-6 h-6 text-black" />
+                {results.current.year}大学合格実績（東進衛生予備校 弘前みたけ校）
               </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-0 space-y-4">
               <ul className="space-y-4">
                 {results.current.university.map((uni, index) => (
-                  <li key={index} className="flex flex-col">
+                  <li key={index} className="flex flex-col text-black">
                     <span className="font-semibold">{uni.name}</span>
                     <span className="text-sm">{uni.department}</span>
                     {uni.count && (
-                      <span className="text-blue-200 text-sm">{uni.count}名合格</span>
+                      <span className="text-sm text-gray-700">{uni.count}名合格</span>
                     )}
                   </li>
                 ))}
@@ -138,21 +138,21 @@ export function ResultsSection() {
           </Card>
 
           {/* 累積実績 */}
-          <Card className="shadow-lg bg-gray-50">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Users className="w-6 h-6 text-blue-600" />
+          <Card className="bg-white border border-gray-300 hover:shadow-lg hover:-translate-y-1 transition-transform p-4">
+            <CardHeader className="p-0 mb-4">
+              <CardTitle className="flex items-center gap-2 text-black">
+                <Users className="w-6 h-6 text-black" />
                 {results.cumulative.period}累積実績
               </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-0 space-y-4">
               <ul className="space-y-4">
                 {results.cumulative.highlights.map((highlight, index) => (
-                  <li key={index} className="flex flex-col">
+                  <li key={index} className="flex flex-col text-black">
                     <span className="font-semibold">{highlight.name}</span>
-                    <span className="text-2xl font-bold text-blue-600">{highlight.count}名</span>
+                    <span className="text-2xl font-bold">{highlight.count}名</span>
                     {highlight.note && (
-                      <p className="text-sm text-gray-600">{highlight.note}</p>
+                      <p className="text-sm text-gray-700">{highlight.note}</p>
                     )}
                   </li>
                 ))}

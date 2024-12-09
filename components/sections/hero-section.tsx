@@ -277,6 +277,12 @@ export const HeroSection: FC = () => {
     </h1>
     <div className="text-lg md:text-2xl font-medium text-gray-800 mt-2 md:mt-4">
       <TextAnimator targetText="弘前で最高の学習環境を提供するために" duration={2000} delay={1000} />
+
+      <div className="text-base md:text-lg text-gray-600 mt-2 md:mt-4">
+        <TextAnimator targetText="弘前トップゼミナールは1992年の創設以来、30年以上地域の教育の最前線を走り続けています" duration={2000} delay={1000} />
+      </div>
+
+      
     </div>
   </motion.div>
 
@@ -320,8 +326,12 @@ export const HeroSection: FC = () => {
           <h1 className="text-6xl font-bold text-gray-900 mb-4">
             <TextAnimator targetText="Practice Makes Perfect" duration={2000} delay={600} />
           </h1>
-          <div className="text-2xl font-medium text-gray-800 mt-4">
+          <div className="text-2xl font-medium text-gray-800 mb-4">
             <TextAnimator targetText="弘前で最高の学習環境を提供するために" duration={2000} delay={1000} />
+          </div>
+
+         <div className="text-2xl font-medium text-gray-600 mt-4">
+            <TextAnimator targetText="弘前トップゼミナールは1992年の創設以来、30年以上地域の教育の最前線を走り続けています" duration={2000} delay={1000} />
           </div>
         </motion.div>
 
