@@ -1,10 +1,22 @@
 'use client';
 
-import { FC, useEffect, useRef, useCallback } from 'react';
+import { FC, useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { motion } from 'framer-motion';
 
 export const HeroSection: FC = () => {
+  // 画面幅をチェックしてモバイル判定
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+  
   // GlitchImageコンポーネント
   const GlitchImage: FC<{
     imageSrc: string;
@@ -19,14 +31,13 @@ export const HeroSection: FC = () => {
   }) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const timeoutRef = useRef<NodeJS.Timeout | null>(null);
-    const mouse = useRef({ x: 0, y: 0 });
 
     useEffect(() => {
       if (!containerRef.current) return;
 
       const scene = new THREE.Scene();
       const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
-      camera.position.z = 1
+      camera.position.z = 1;
 
       const renderer = new THREE.WebGLRenderer({ alpha: true });
       containerRef.current.appendChild(renderer.domElement);
@@ -78,7 +89,6 @@ export const HeroSection: FC = () => {
 
         void main() {
           vec2 uv = vUv;
-          // Subtle parallax based on mouse position
           uv += vec2((mouseX - 0.5) * 0.02, (mouseY - 0.5) * 0.02);
 
           vec4 color;
@@ -135,7 +145,6 @@ export const HeroSection: FC = () => {
       };
       applyRandomEffect();
 
-      // Add mouse move listener for interactive parallax
       const handleMouseMove = (e: MouseEvent) => {
         const rect = containerRef.current?.getBoundingClientRect();
         if (!rect) return;
@@ -250,21 +259,20 @@ export const HeroSection: FC = () => {
         }}
       ></div>
 
-      <div className="relative z-10 w-full flex justify-between items-end px-10 gap-10">
+      <div className="relative z-10 w-full flex flex-col md:flex-row justify-between items-center md:items-end px-5 md:px-10 gap-5 md:gap-10">
         {/* 左カラム */}
-        <div className="flex flex-col space-y-6 text-left max-w-xl">
+        <div className="flex flex-col space-y-6 text-left max-w-xl w-full">
           {/* タイトル */}
           <motion.div
             initial={{ opacity: 0, x: -30 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 1.5, ease: 'easeOut' }}
-            className="text-5xl md:text-7xl font-extrabold leading-tight text-white whitespace-nowrap relative"
+            className="text-4xl md:text-7xl font-extrabold leading-tight text-white whitespace-nowrap relative"
             style={{
               textShadow: '0 0 20px rgba(0,200,255,0.5)',
             }}
           >
             <div className="relative inline-block">
-              {/* タイトルに微細なグラデーションと輝き */}
               <span
                 style={{
                   background: 'linear-gradient(90deg, #89cff0, #b3ecff)',
@@ -274,7 +282,6 @@ export const HeroSection: FC = () => {
               >
                 <TextAnimator targetText="弘前トップゼミナール" duration={1500} delay={500} />
               </span>
-              {/* ホログラフィックな微光 */}
               <span
                 className="absolute inset-0"
                 style={{
@@ -292,7 +299,7 @@ export const HeroSection: FC = () => {
             initial={{ opacity: 0, x: -30 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 2, delay: 1, ease: 'easeOut' }}
-            className="text-2xl md:text-4xl font-semibold text-blue-200"
+            className="text-xl md:text-4xl font-semibold text-blue-200"
           >
             <TextAnimator
               targetText="Practice Makes Perfect"
@@ -306,7 +313,7 @@ export const HeroSection: FC = () => {
             initial={{ opacity: 0, x: -30 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 2.5, delay: 1.5, ease: 'easeOut' }}
-            className="text-xl md:text-2xl font-medium text-blue-100 leading-relaxed"
+            className="text-lg md:text-2xl font-medium text-blue-100 leading-relaxed"
           >
             <TextAnimator
               targetText="弘前で最高の学習環境を提供するために"
@@ -320,7 +327,7 @@ export const HeroSection: FC = () => {
             initial={{ opacity: 0, x: -30 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 2.5, delay: 2, ease: 'easeOut' }}
-            className="leading-snug space-y-2"
+            className="leading-snug space-y-2 text-sm md:text-base"
           >
             <div className="text-lg md:text-2xl font-bold text-blue-100">
               <TextAnimator
@@ -329,102 +336,20 @@ export const HeroSection: FC = () => {
                 delay={1200}
               />
             </div>
-            <div className="text-base md:text-lg font-semibold text-white">
+            <div className="font-semibold text-white">
               <TextAnimator
                 targetText="弘前高校 39人"
                 duration={2000}
                 delay={1400}
               />
             </div>
-            <div className="text-base md:text-lg font-semibold text-white">
+            <div className="font-semibold text-white">
               <TextAnimator
                 targetText="弘前大学教育学部附属中学校 25人(内部＋外部)"
                 duration={2000}
                 delay={1600}
               />
             </div>
-          </motion.div>
-
-          {/* STOPコース */}
-          <motion.div
-            initial={{ opacity: 0, x: -30 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 2.5, delay: 2.5, ease: 'easeOut' }}
-            className="text-base md:text-lg font-normal text-blue-200 leading-snug mt-4"
-          >
-            <TextAnimator
-              targetText="STOPコースなどの革新的な指導で、地方と大都市圏の教育格差に挑戦"
-              duration={2000}
-              delay={1800}
-            />
-          </motion.div>
-        </div>
-
-        {/* 右カラム: S-TOPコース実績 (改行増やして見やすく) */}
-        <div className="flex flex-col space-y-3 text-right max-w-xl">
-          <motion.div
-            initial={{ opacity: 0, x: 30 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 2.5, delay: 3, ease: 'easeOut' }}
-            className="text-base md:text-lg font-normal text-blue-200 leading-relaxed"
-          >
-            <TextAnimator
-              targetText="2024年度 S-TOP コース出身者 大学入試 合格状況"
-              duration={2000}
-              delay={2000}
-            />
-
-            <br />
-
-            <TextAnimator targetText="東京大学 2名" duration={2000} delay={2100} />
-
-            <br />
-
-            <TextAnimator targetText="京都大学 1名" duration={2000} delay={2200} />
-
-            <br />
-
-            <TextAnimator targetText="東北大学 4名" duration={2000} delay={2300} />
-
-            <br />
-
-            <TextAnimator targetText="横浜国立大学 2名" duration={2000} delay={2400} />
-
-            <br />
-
-            <TextAnimator targetText="筑波大学 1名" duration={2000} delay={2500} />
-
-            <br />
-
-            <TextAnimator targetText="その他にも多数合格者" duration={2000} delay={2600} />
-
-            <br /><br />
-
-            <TextAnimator targetText="医学部系合格実績:" duration={2000} delay={2700} />
-            
-            <br />
-
-            <TextAnimator
-              targetText="東北大学 医学部 医学科 1名"
-              duration={2000}
-              delay={2800}
-            />
-
-            <br />
-
-            <TextAnimator
-              targetText="弘前大学 医学部医学科 2名"
-              duration={2000}
-              delay={2900}
-            />
-
-            <br />
-
-            <TextAnimator
-              targetText="秋田大学 医学部医学科 1名"
-              duration={2000}
-              delay={3000}
-            />
           </motion.div>
         </div>
       </div>
