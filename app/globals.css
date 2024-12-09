@@ -84,3 +84,18 @@
 html {
   scroll-behavior: smooth;
 }
+
+/* globals.css */
+
+/* ルートフォントを Montserrat に設定 */
+body {
+  font-family: var(--font-montserrat), sans-serif;
+}
+
+/* 必要に応じて他のスタイルも追加 */
+h1, h2, h3 {
+  font-weight: 700;
+}
+p, span, a {
+  font-weight: 400;
+}
