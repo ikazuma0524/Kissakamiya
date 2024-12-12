@@ -4,15 +4,6 @@ import { FC, useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { motion } from 'framer-motion';
 
-
-
-
-
-
-
-
-
-
 const GeometricAnimation: FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -25,8 +16,8 @@ const GeometricAnimation: FC = () => {
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0xffffff);
 
-    const camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
-    camera.position.z = 3; // 近くして図形を大きく見せる
+    const camera = new THREE.PerspectiveCamera(70, width / height, 0.1, 1000);
+    camera.position.z = 3;
     camera.lookAt(0, 0, 0);
 
     const renderer = new THREE.WebGLRenderer({
@@ -38,17 +29,18 @@ const GeometricAnimation: FC = () => {
     renderer.setSize(width, height);
     containerRef.current.appendChild(renderer.domElement);
 
-    const lineMaterial = new THREE.LineBasicMaterial({ color: 0x000000 });
-
-    // シンプルなメビウス帯的な曲面を描くパラメトリックライン
-    const uSegments = 200;
-    const vSegments = 30;
+    // 線の本数を適度に減らし、軽くする
+    const uSegments = 100;
+    const vSegments = 20;
     const uMin = 0, uMax = 2 * Math.PI;
     const vMin = -1, vMax = 1;
+
+    const lineMaterial = new THREE.LineBasicMaterial({ color: 0x000000, linewidth: 1 });
 
     const uLines: THREE.LineLoop[] = [];
     const vLines: THREE.LineLoop[] = [];
 
+    // u固定ライン群
     for (let i = 0; i <= uSegments; i++) {
       const geometry = new THREE.BufferGeometry();
       const positions = new Float32Array((vSegments + 1) * 3);
@@ -58,6 +50,7 @@ const GeometricAnimation: FC = () => {
       scene.add(line);
     }
 
+    // v固定ライン群
     for (let j = 0; j <= vSegments; j++) {
       const geometry = new THREE.BufferGeometry();
       const positions = new Float32Array((uSegments + 1) * 3);
@@ -72,13 +65,13 @@ const GeometricAnimation: FC = () => {
 
     const animate = () => {
       animationFrameId = requestAnimationFrame(animate);
-      time += 0.07; // 変化を速く
+      time += 0.05;
 
-      // ベースとなる半径をやや大きくし、波を強めて流動的に
+      // ベースパラメータ
       const baseR = 1.5;
-      const waveAmp = 0.4; // 波の振幅
-      const waveFreq = 5.0; // 波の周波数を上げて速い変化を演出
-      const verticalWave = 0.3; // 縦方向の変動
+      const waveAmp = 0.35;
+      const waveFreq = 4.0; 
+      const verticalWave = 0.25;
 
       // u固定ライン更新
       uLines.forEach((line, i) => {
@@ -87,13 +80,11 @@ const GeometricAnimation: FC = () => {
         const u = uMin + (uMax - uMin) * (i / uSegments);
         for (let k = 0; k < count; k++) {
           const v = vMin + (vMax - vMin) * (k / vSegments);
-          // 波の計算
           const wave = waveAmp * Math.sin(time + u * waveFreq + v * waveFreq);
           const R = baseR + (v * 0.5) * Math.cos(u / 2 + wave);
           const x = R * Math.cos(u);
           const y = R * Math.sin(u);
-          const z = v * Math.sin(u / 2) * verticalWave + wave * 0.5;
-
+          const z = v * Math.sin(u / 2) * verticalWave + wave * 0.4;
           positions.setXYZ(k, x, y, z);
         }
         positions.needsUpdate = true;
@@ -110,26 +101,22 @@ const GeometricAnimation: FC = () => {
           const R = baseR + (v * 0.5) * Math.cos(u / 2 + wave);
           const x = R * Math.cos(u);
           const y = R * Math.sin(u);
-          const z = v * Math.sin(u / 2) * verticalWave + wave * 0.5;
-
+          const z = v * Math.sin(u / 2) * verticalWave + wave * 0.4;
           positions.setXYZ(k, x, y, z);
         }
         positions.needsUpdate = true;
       });
 
-      // カメラを一周ゆっくりぐるっと回転する感じ
-const radius = 2.5; // カメラが回る半径
-const horizontalSpeed = 0.05; // カメラが一周する速さ（小さいほどゆっくり）
-const verticalWaveSpeed = 0.1; 
-const verticalWaveAmp = 0.3;
+      // カメラをゆっくり回転
+      const radius = 2.5;
+      const horizontalSpeed = 0.02;
+      const verticalWaveSpeed = 0.08; 
+      const verticalWaveAmp = 0.2;
 
-camera.position.x = Math.sin(time * horizontalSpeed) * radius;
-camera.position.z = Math.cos(time * horizontalSpeed) * radius;
-camera.position.y = 0.5 + Math.cos(time * verticalWaveSpeed) * verticalWaveAmp;
-camera.lookAt(0, 0, 0);
-
-renderer.render(scene, camera);
-
+      camera.position.x = Math.sin(time * horizontalSpeed) * radius;
+      camera.position.z = Math.cos(time * horizontalSpeed) * radius;
+      camera.position.y = 0.5 + Math.cos(time * verticalWaveSpeed) * verticalWaveAmp;
+      camera.lookAt(0, 0, 0);
 
       renderer.render(scene, camera);
     };
@@ -177,21 +164,6 @@ renderer.render(scene, camera);
     />
   );
 };
-
-export default GeometricAnimation;
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 const TextAnimator: FC<{
   className?: string;
@@ -241,6 +213,7 @@ const TextAnimator: FC<{
   return <span className={className} ref={ref} />;
 };
 
+
 export const HeroSection: FC = () => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isMobile, setIsMobile] = useState(true);
@@ -250,7 +223,6 @@ export const HeroSection: FC = () => {
       const mobile = window.innerWidth < 768;
       setIsMobile(mobile);
     };
-
     checkScreenSize();
     window.addEventListener('resize', checkScreenSize);
     return () => window.removeEventListener('resize', checkScreenSize);
@@ -263,51 +235,43 @@ export const HeroSection: FC = () => {
   }, []);
 
   if (isMobile) {
-    // モバイル専用画面、テキストもアニメーションで表示
+    // モバイル版
     return (
       <div className="w-full md:w-1/2 h-screen flex flex-col justify-center items-start p-2 md:p-10 bg-white">
-  <motion.div
-    initial={{ opacity: 0, x: 20 }}
-    animate={{ opacity: isLoaded ? 1 : 0, x: isLoaded ? 0 : 20 }}
-    transition={{ duration: 1, ease: 'easeOut' }}
-    className="mb-6 md:mb-10"
-  >
-    <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-4">
-      <TextAnimator targetText="Practice Makes Perfect" duration={2000} delay={600} />
-    </h1>
-    <div className="text-lg md:text-2xl font-medium text-gray-800 mt-2 md:mt-4">
-      <TextAnimator targetText="弘前で最高の学習環境を提供するために" duration={2000} delay={1000} />
+        <motion.div
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: isLoaded ? 1 : 0, x: isLoaded ? 0 : 20 }}
+          transition={{ duration: 1, ease: 'easeOut' }}
+          className="mb-6 md:mb-10"
+        >
+          <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-4">
+            <TextAnimator targetText="Practice Makes Perfect" duration={2000} delay={600} />
+          </h1>
+          <div className="text-lg md:text-2xl font-medium text-gray-800 mt-2 md:mt-4">
+            <TextAnimator targetText="弘前で最高の学習環境を提供するために" duration={2000} delay={1000} />
+            <div className="text-base md:text-lg text-gray-600 mt-2 md:mt-4">
+              <TextAnimator targetText="弘前トップゼミナールは1992年の創設以来、30年以上地域の教育の最前線を走り続けています" duration={2000} delay={1000} />
+            </div>
+          </div>
+        </motion.div>
 
-      <div className="text-base md:text-lg text-gray-600 mt-2 md:mt-4">
-        <TextAnimator targetText="弘前トップゼミナールは1992年の創設以来、30年以上地域の教育の最前線を走り続けています" duration={2000} delay={1000} />
+        <motion.div
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: isLoaded ? 1 : 0, x: isLoaded ? 0 : 20 }}
+          transition={{ duration: 1, ease: 'easeOut', delay: 1.5 }}
+          className="space-y-3 md:space-y-4"
+        >
+          <h2 className="text-2xl md:text-3xl font-semibold text-gray-800 mb-2 md:mb-4">
+            <TextAnimator targetText="令和5年度　実績" duration={2000} delay={1200} />
+          </h2>
+          <ul className="text-lg md:text-2xl text-gray-800 font-medium space-y-2">
+            <li><TextAnimator targetText="弘前高校 39人合格" duration={2000} delay={1400} /></li>
+            <li><TextAnimator targetText="弘前大学教育学部附属中学校 25人合格" duration={2000} delay={1600} /></li>
+          </ul>
+        </motion.div>
       </div>
-
-      
-    </div>
-  </motion.div>
-
-  <motion.div
-    initial={{ opacity: 0, x: 20 }}
-    animate={{ opacity: isLoaded ? 1 : 0, x: isLoaded ? 0 : 20 }}
-    transition={{ duration: 1, ease: 'easeOut', delay: 1.5 }}
-    className="space-y-3 md:space-y-4"
-  >
-    <h2 className="text-2xl md:text-3xl font-semibold text-gray-800 mb-2 md:mb-4">
-      <TextAnimator targetText="令和5年度　実績" duration={2000} delay={1200} />
-    </h2>
-    <ul className="text-lg md:text-2xl text-gray-800 font-medium space-y-2">
-      <li>
-        <TextAnimator targetText="弘前高校 39人合格" duration={2000} delay={1400} />
-      </li>
-      <li>
-        <TextAnimator targetText="弘前大学教育学部附属中学校 25人合格" duration={2000} delay={1600} />
-      </li>
-    </ul>
-  </motion.div>
-</div>
     );
   }
-      
 
   // PC版
   return (
@@ -329,8 +293,7 @@ export const HeroSection: FC = () => {
           <div className="text-2xl font-medium text-gray-800 mb-4">
             <TextAnimator targetText="弘前で最高の学習環境を提供するために" duration={2000} delay={1000} />
           </div>
-
-         <div className="text-2xl font-medium text-gray-600 mt-4">
+          <div className="text-2xl font-medium text-gray-600 mt-4">
             <TextAnimator targetText="弘前トップゼミナールは1992年の創設以来、30年以上地域の教育の最前線を走り続けています" duration={2000} delay={1000} />
           </div>
         </motion.div>

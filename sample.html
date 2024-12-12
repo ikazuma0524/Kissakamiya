@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Interactive Landing Page</title>
+<style>
+  html, body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Inter', sans-serif;
+    height: 100%;
+    width: 100%;
+    overflow-x: hidden;
+    background: #000;
+    color: #fff;
+  }
+
+  #three-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: -1;
+  }
+
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 20px;
+    position: relative;
+    background: linear-gradient(to bottom, transparent, rgba(0,0,0,0.7));
+  }
+
+  .main-title {
+    font-size: clamp(2.5rem, 8vw, 6rem);
+    font-weight: 900;
+    line-height: 1.1;
+    background: linear-gradient(45deg, #fff, #7928CA);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: fadeInUp 1.5s ease forwards;
+    opacity: 0;
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: -0.02em;
+  }
+
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(50px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  section {
+    padding: 120px 20px;
+    background: rgba(0,0,0,0.8);
+    backdrop-filter: blur(20px);
+    margin: 0;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    position: relative;
+    overflow: hidden;
+  }
+
+  h2 {
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    margin-bottom: 40px;
+    background: linear-gradient(45deg, #fff, #7928CA);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-align: center;
+  }
+
+  p {
+    color: #ccc;
+    max-width: 800px;
+    margin: 0 auto 40px;
+    line-height: 1.8;
+    font-size: 1.2rem;
+    text-align: center;
+  }
+
+  .project-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 30px;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+
+  .project-item {
+    background: rgba(255,255,255,0.05);
+    padding: 40px;
+    border-radius: 20px;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255,255,255,0.1);
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .project-item:hover {
+    transform: translateY(-10px);
+    background: rgba(255,255,255,0.1);
+    border-color: rgba(255,255,255,0.2);
+  }
+
+  .project-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1));
+    transform: translateX(-100%);
+    transition: transform 0.6s ease;
+  }
+
+  .project-item:hover::before {
+    transform: translateX(100%);
+  }
+
+  .services {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 30px;
+    justify-content: center;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+
+  .service-card {
+    width: 300px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    padding: 40px;
+    border-radius: 20px;
+    text-align: center;
+    transition: all 0.3s ease;
+  }
+
+  .service-card:hover {
+    transform: translateY(-10px);
+    background: rgba(255,255,255,0.1);
+    border-color: rgba(255,255,255,0.2);
+  }
+
+  .scroll-indicator {
+    position: absolute;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #fff;
+    font-size: 1.2rem;
+    opacity: 0.7;
+    animation: upDown 1.5s infinite alternate ease-in-out;
+  }
+
+  @keyframes upDown {
+    0% {
+      transform: translate(-50%, 0);
+    }
+    100% {
+      transform: translate(-50%, 20px);
+    }
+  }
+
+  @media (max-width: 768px) {
+    section {
+      padding: 80px 20px;
+    }
+  }
+</style>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+<div id="three-bg"></div>
+
+<header class="hero">
+  <h1 class="main-title">Interactive<br>Experiences<br>For Tomorrow</h1>
+  <div class="scroll-indicator">↓</div>
+</header>
+
+<section class="about-section">
+  <h2>About Us</h2>
+  <p>We craft digital experiences that push the boundaries of what's possible. Through innovative technology and creative design, we transform ideas into immersive realities that engage, inspire, and delight.</p>
+</section>
+
+<section class="project-section">
+  <h2>Our Projects</h2>
+  <div class="project-grid">
+    <div class="project-item">Virtual Reality Experience</div>
+    <div class="project-item">Interactive Installations</div>
+    <div class="project-item">Digital Art Gallery</div>
+    <div class="project-item">Immersive Websites</div>
+  </div>
+</section>
+
+<section class="service-section">
+  <h2>Services</h2>
+  <div class="services">
+    <div class="service-card">Interactive Development</div>
+    <div class="service-card">Creative Technology</div>
+    <div class="service-card">Digital Innovation</div>
+  </div>
+</section>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.146.0/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/simplex-noise/2.4.0/simplex-noise.min.js"></script>
+<script>
+let scene, camera, renderer, clock;
+let galaxy, particles;
+let simplex = new SimplexNoise();
+let mouseX = 0, mouseY = 0;
+let targetRotationX = 0, targetRotationY = 0;
+let windowHalfX = window.innerWidth / 2;
+let windowHalfY = window.innerHeight / 2;
+
+init();
+animate();
+
+function init() {
+  const container = document.getElementById('three-bg');
+  
+  scene = new THREE.Scene();
+  camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+  camera.position.z = 30;
+
+  renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setPixelRatio(window.devicePixelRatio);
+  container.appendChild(renderer.domElement);
+
+  clock = new THREE.Clock();
+
+  // Create galaxy
+  const geometry = new THREE.BufferGeometry();
+  const positions = [];
+  const colors = [];
+  const sizes = [];
+
+  const particleCount = 15000;
+  const colorPalette = [
+    new THREE.Color('#ff3366'),
+    new THREE.Color('#7928CA'),
+    new THREE.Color('#00ff88'),
+    new THREE.Color('#ffffff')
+  ];
+
+  for (let i = 0; i < particleCount; i++) {
+    // Spiral distribution
+    const angle = (i / particleCount) * Math.PI * 20;
+    const radius = THREE.MathUtils.randFloat(0.1, 20);
+    const spiralRadius = radius + (angle / 100);
+    
+    const x = Math.cos(angle) * spiralRadius;
+    const y = THREE.MathUtils.randFloatSpread(5) * (radius * 0.2);
+    const z = Math.sin(angle) * spiralRadius;
+
+    positions.push(x, y, z);
+
+    // Random color from palette
+    const color = colorPalette[Math.floor(Math.random() * colorPalette.length)];
+    colors.push(color.r, color.g, color.b);
+
+    // Random size
+    sizes.push(THREE.MathUtils.randFloat(0.1, 0.5));
+  }
+
+  geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+  geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+  geometry.setAttribute('size', new THREE.Float32BufferAttribute(sizes, 1));
+
+  const material = new THREE.PointsMaterial({
+    size: 0.1,
+    vertexColors: true,
+    transparent: true,
+    opacity: 0.8,
+    sizeAttenuation: true
+  });
+
+  galaxy = new THREE.Points(geometry, material);
+  scene.add(galaxy);
+
+  // Events
+  document.addEventListener('mousemove', onMouseMove);
+  window.addEventListener('resize', onWindowResize);
+  document.addEventListener('scroll', onScroll);
+}
+
+function onMouseMove(event) {
+  mouseX = (event.clientX - windowHalfX) * 0.05;
+  mouseY = (event.clientY - windowHalfY) * 0.05;
+
+  targetRotationY = (mouseX - galaxy.rotation.y) * 0.003;
+  targetRotationX = (mouseY - galaxy.rotation.x) * 0.003;
+}
+
+function onWindowResize() {
+  windowHalfX = window.innerWidth / 2;
+  windowHalfY = window.innerHeight / 2;
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+function onScroll() {
+  const scrolled = window.pageYOffset;
+  galaxy.rotation.z = scrolled * 0.001;
+}
+
+function animate() {
+  requestAnimationFrame(animate);
+
+  const time = clock.getElapsedTime() * 0.5;
+
+  // Smooth rotation
+  galaxy.rotation.y += targetRotationY;
+  galaxy.rotation.x += targetRotationX;
+
+  // Gentle constant rotation
+  galaxy.rotation.y += 0.001;
+
+  // Update particles
+  const positions = galaxy.geometry.attributes.position.array;
+  const sizes = galaxy.geometry.attributes.size.array;
+
+  for (let i = 0; i < positions.length; i += 3) {
+    const noise = simplex.noise3D(
+      positions[i] * 0.02 + time,
+      positions[i + 1] * 0.02 + time,
+      positions[i + 2] * 0.02
+    ) * 0.1;
+
+    positions[i + 1] += noise;
+    sizes[i/3] = Math.abs(noise) + 0.1;
+  }
+
+  galaxy.geometry.attributes.position.needsUpdate = true;
+  galaxy.geometry.attributes.size.needsUpdate = true;
+
+  renderer.render(scene, camera);
+}
+</script>
+</body>
+</html>
