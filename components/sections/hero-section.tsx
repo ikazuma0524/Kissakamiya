@@ -1,318 +1,199 @@
-'use client';
+import { useEffect, useRef, useState } from 'react';
 
-import { FC, useEffect, useRef, useState } from 'react';
-import * as THREE from 'three';
-import { motion } from 'framer-motion';
+export function HeroSection() {
+  const introTexts = [
+    "当店は厳選した豆を使ったコーヒー、手作りの洋菓子、そして季節の軽食をご用意しております。静かな店内でゆっくりお過ごしください。",
+    "春には桜をイメージしたスイーツ、夏には柑橘を使った爽やかなドリンク、秋にはりんごや栗を使った甘み深い菓子、冬には濃厚なチョコレートスイーツをご用意しています。",
+    "季節が巡るたびに、新しい味覚との出会いがあり、何度訪れても新鮮な驚きを提供します。",
+    "心地よいBGMと柔らかな照明、そして丁寧な接客が、ここで過ごすひとときを特別なものにしています。",
+    "読書をしたり、静かに物思いにふけったり、あるいは大切な人との会話を楽しんだり——自由な時間をお過ごしください。",
+    "地元の生産者から仕入れる素材にもこだわり、土地の恵みを感じられるメニューづくりを心がけています。"
+  ];
 
-const GeometricAnimation: FC = () => {
-  const containerRef = useRef<HTMLDivElement>(null);
+  const leftImages = [
+    { src: '/left-img1.jpg', mt: 'mt-0' },
+    { src: '/left-img2.jpg', mt: 'mt-20' },
+    { src: '/left-img3.jpg', mt: 'mt-40' },
+    { src: '/left-img4.jpg', mt: 'mt-10' },
+  ];
+
+  const rightImages = [
+    { src: '/right-img1.jpg', mt: 'mt-32' },
+    { src: '/right-img2.jpg', mt: 'mt-0' },
+    { src: '/right-img3.jpg', mt: 'mt-28' },
+    { src: '/right-img4.jpg', mt: 'mt-48' },
+  ];
+
+  const [introVisibles, setIntroVisibles] = useState<boolean[]>(Array(introTexts.length).fill(false));
+  const [leftVisibles, setLeftVisibles] = useState<boolean[]>(Array(leftImages.length).fill(false));
+  const [rightVisibles, setRightVisibles] = useState<boolean[]>(Array(rightImages.length).fill(false));
+
+  const introRefs = useRef<HTMLParagraphElement[]>([]);
+  const leftRefs = useRef<HTMLDivElement[]>([]);
+  const rightRefs = useRef<HTMLDivElement[]>([]);
+
+  introRefs.current = [];
+  leftRefs.current = [];
+  rightRefs.current = [];
+
+  const addIntroRef = (el: HTMLParagraphElement) => {
+    if (el && !introRefs.current.includes(el)) introRefs.current.push(el);
+  };
+  const addLeftRef = (el: HTMLDivElement) => {
+    if (el && !leftRefs.current.includes(el)) leftRefs.current.push(el);
+  };
+  const addRightRef = (el: HTMLDivElement) => {
+    if (el && !rightRefs.current.includes(el)) rightRefs.current.push(el);
+  };
 
   useEffect(() => {
-    if (!containerRef.current) return;
-
-    const width = containerRef.current.clientWidth;
-    const height = containerRef.current.clientHeight;
-
-    const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0xffffff);
-
-    const camera = new THREE.PerspectiveCamera(70, width / height, 0.1, 1000);
-    camera.position.z = 3;
-    camera.lookAt(0, 0, 0);
-
-    const renderer = new THREE.WebGLRenderer({
-      alpha: true,
-      antialias: true,
-      canvas: document.createElement('canvas')
-    });
-    renderer.setPixelRatio(window.devicePixelRatio);
-    renderer.setSize(width, height);
-    containerRef.current.appendChild(renderer.domElement);
-
-    // 線の本数を適度に減らし、軽くする
-    const uSegments = 100;
-    const vSegments = 20;
-    const uMin = 0, uMax = 2 * Math.PI;
-    const vMin = -1, vMax = 1;
-
-    const lineMaterial = new THREE.LineBasicMaterial({ color: 0x000000, linewidth: 1 });
-
-    const uLines: THREE.LineLoop[] = [];
-    const vLines: THREE.LineLoop[] = [];
-
-    // u固定ライン群
-    for (let i = 0; i <= uSegments; i++) {
-      const geometry = new THREE.BufferGeometry();
-      const positions = new Float32Array((vSegments + 1) * 3);
-      geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-      const line = new THREE.LineLoop(geometry, lineMaterial);
-      uLines.push(line);
-      scene.add(line);
-    }
-
-    // v固定ライン群
-    for (let j = 0; j <= vSegments; j++) {
-      const geometry = new THREE.BufferGeometry();
-      const positions = new Float32Array((uSegments + 1) * 3);
-      geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-      const line = new THREE.LineLoop(geometry, lineMaterial);
-      vLines.push(line);
-      scene.add(line);
-    }
-
-    let time = 0;
-    let animationFrameId: number;
-
-    const animate = () => {
-      animationFrameId = requestAnimationFrame(animate);
-      time += 0.05;
-
-      // ベースパラメータ
-      const baseR = 1.5;
-      const waveAmp = 0.35;
-      const waveFreq = 4.0; 
-      const verticalWave = 0.25;
-
-      // u固定ライン更新
-      uLines.forEach((line, i) => {
-        const positions = line.geometry.getAttribute('position') as THREE.BufferAttribute;
-        const count = positions.count;
-        const u = uMin + (uMax - uMin) * (i / uSegments);
-        for (let k = 0; k < count; k++) {
-          const v = vMin + (vMax - vMin) * (k / vSegments);
-          const wave = waveAmp * Math.sin(time + u * waveFreq + v * waveFreq);
-          const R = baseR + (v * 0.5) * Math.cos(u / 2 + wave);
-          const x = R * Math.cos(u);
-          const y = R * Math.sin(u);
-          const z = v * Math.sin(u / 2) * verticalWave + wave * 0.4;
-          positions.setXYZ(k, x, y, z);
-        }
-        positions.needsUpdate = true;
-      });
-
-      // v固定ライン更新
-      vLines.forEach((line, j) => {
-        const positions = line.geometry.getAttribute('position') as THREE.BufferAttribute;
-        const count = positions.count;
-        const v = vMin + (vMax - vMin) * (j / vSegments);
-        for (let k = 0; k < count; k++) {
-          const u = uMin + (uMax - uMin) * (k / uSegments);
-          const wave = waveAmp * Math.sin(time + u * waveFreq + v * waveFreq);
-          const R = baseR + (v * 0.5) * Math.cos(u / 2 + wave);
-          const x = R * Math.cos(u);
-          const y = R * Math.sin(u);
-          const z = v * Math.sin(u / 2) * verticalWave + wave * 0.4;
-          positions.setXYZ(k, x, y, z);
-        }
-        positions.needsUpdate = true;
-      });
-
-      // カメラをゆっくり回転
-      const radius = 2.5;
-      const horizontalSpeed = 0.02;
-      const verticalWaveSpeed = 0.08; 
-      const verticalWaveAmp = 0.2;
-
-      camera.position.x = Math.sin(time * horizontalSpeed) * radius;
-      camera.position.z = Math.cos(time * horizontalSpeed) * radius;
-      camera.position.y = 0.5 + Math.cos(time * verticalWaveSpeed) * verticalWaveAmp;
-      camera.lookAt(0, 0, 0);
-
-      renderer.render(scene, camera);
+    const options = {
+      root: null,
+      rootMargin: '0px',
+      threshold: 0.2,
     };
 
-    animate();
+    // テキスト監視
+    const introObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        const index = introRefs.current.indexOf(entry.target as HTMLParagraphElement);
+        if (index > -1) {
+          setIntroVisibles(prev => {
+            const newArr = [...prev];
+            newArr[index] = entry.isIntersecting;
+            return newArr;
+          });
+        }
+      });
+    }, options);
+    introRefs.current.forEach(el => introObserver.observe(el));
 
-    const handleResize = () => {
-      if (!containerRef.current) return;
-      const w = containerRef.current.clientWidth;
-      const h = containerRef.current.clientHeight;
-      camera.aspect = w / h;
-      camera.updateProjectionMatrix();
-      renderer.setSize(w, h);
-    };
+    // 左画像監視
+    const leftObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        const index = leftRefs.current.indexOf(entry.target as HTMLDivElement);
+        if (index > -1) {
+          setLeftVisibles(prev => {
+            const newArr = [...prev];
+            newArr[index] = entry.isIntersecting;
+            return newArr;
+          });
+        }
+      });
+    }, options);
+    leftRefs.current.forEach(el => leftObserver.observe(el));
 
-    window.addEventListener('resize', handleResize);
+    // 右画像監視
+    const rightObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        const index = rightRefs.current.indexOf(entry.target as HTMLDivElement);
+        if (index > -1) {
+          setRightVisibles(prev => {
+            const newArr = [...prev];
+            newArr[index] = entry.isIntersecting;
+            return newArr;
+          });
+        }
+      });
+    }, options);
+    rightRefs.current.forEach(el => rightObserver.observe(el));
 
     return () => {
-      window.removeEventListener('resize', handleResize);
-      cancelAnimationFrame(animationFrameId);
-
-      if (containerRef.current?.contains(renderer.domElement)) {
-        containerRef.current.removeChild(renderer.domElement);
-      }
-
-      uLines.forEach(line => {
-        scene.remove(line);
-        line.geometry.dispose();
-      });
-
-      vLines.forEach(line => {
-        scene.remove(line);
-        line.geometry.dispose();
-      });
-
-      renderer.dispose();
+      introObserver.disconnect();
+      leftObserver.disconnect();
+      rightObserver.disconnect();
     };
   }, []);
 
   return (
-    <div
-      ref={containerRef}
-      className="w-full h-screen relative bg-white"
-      style={{ minHeight: '100vh' }}
-    />
-  );
-};
-
-const TextAnimator: FC<{
-  className?: string;
-  targetText: string;
-  duration?: number;
-  delay?: number;
-}> = ({ className, targetText, duration = 500, delay = 0 }) => {
-  const ref = useRef<HTMLSpanElement>(null);
-  const intervalMs = 5;
-  const probability = (targetText.length / duration) * intervalMs;
-  const characters = 'abcdefghijklmnopqrstuvwxyz ';
-
-  useEffect(() => {
-    let currentIndex = 0;
-    let currentText = Array(targetText.length).fill(' ');
-    let intervalId: NodeJS.Timeout;
-
-    const startAnimation = () => {
-      intervalId = setInterval(() => {
-        if (currentIndex >= targetText.length) {
-          clearInterval(intervalId);
-          return;
-        }
-        const targetChar = targetText[currentIndex];
-        const random = Math.random();
-        if (random < probability) {
-          currentText[currentIndex] = targetChar;
-          currentIndex++;
-        } else {
-          currentText[currentIndex] =
-            characters[Math.floor(random * characters.length)];
-        }
-        if (ref.current) {
-          ref.current.textContent = currentText.join('');
-        }
-      }, intervalMs);
-    };
-
-    const timeoutId = setTimeout(startAnimation, delay);
-    
-    return () => {
-      clearTimeout(timeoutId);
-      clearInterval(intervalId);
-    };
-  }, [targetText, duration, delay]);
-
-  return <span className={className} ref={ref} />;
-};
-
-
-export const HeroSection: FC = () => {
-  const [isLoaded, setIsLoaded] = useState(false);
-  const [isMobile, setIsMobile] = useState(true);
-
-  useEffect(() => {
-    const checkScreenSize = () => {
-      const mobile = window.innerWidth < 768;
-      setIsMobile(mobile);
-    };
-    checkScreenSize();
-    window.addEventListener('resize', checkScreenSize);
-    return () => window.removeEventListener('resize', checkScreenSize);
-  }, []);
-
-  useEffect(() => {
-    setTimeout(() => {
-      setIsLoaded(true);
-    }, 500);
-  }, []);
-
-  if (isMobile) {
-    // モバイル版
-    return (
-      <div className="w-full md:w-1/2 h-screen flex flex-col justify-center items-start p-2 md:p-10 bg-white">
-        <motion.div
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: isLoaded ? 1 : 0, x: isLoaded ? 0 : 20 }}
-          transition={{ duration: 1, ease: 'easeOut' }}
-          className="mb-6 md:mb-10"
+    <div className="w-full h-auto overflow-x-hidden">
+      {/* Hero Section */}
+      <section className="relative w-full h-screen overflow-hidden">
+        <div
+          className="absolute inset-0 bg-cover bg-center"
+          style={{ backgroundImage: 'url(/kamiya.jpg)' }}
         >
-          <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-4">
-            <TextAnimator targetText="Practice Makes Perfect" duration={2000} delay={600} />
+          <div className="absolute inset-0 bg-black/30"></div>
+        </div>
+        <div className="relative z-10 flex flex-col h-full justify-center items-center text-center px-4">
+          <h1 className="text-5xl md:text-7xl font-serif font-bold text-white mb-4">
+            喫茶KAMIYA
           </h1>
-          <div className="text-lg md:text-2xl font-medium text-gray-800 mt-2 md:mt-4">
-            <TextAnimator targetText="弘前で最高の学習環境を提供するために" duration={2000} delay={1000} />
-            <div className="text-base md:text-lg text-gray-600 mt-2 md:mt-4">
-              <TextAnimator targetText="弘前トップゼミナールは1992年の創設以来、30年以上地域の教育の最前線を走り続けています" duration={2000} delay={1000} />
+          <p className="text-xl md:text-2xl font-serif font-light text-white/90 max-w-xl mx-auto leading-relaxed">
+          　　ここにキャッチコピーを入れる
+          </p>
+        </div>
+      </section>
+
+      {/* 3カラムレイアウト - 細長くするために大きな縦余白 */}
+      <section className="relative py-96 bg-gradient-to-b from-white to-gray-50">
+        <div className="container mx-auto px-6 flex flex-col md:flex-row md:space-x-12 relative">
+          {/* 左カラム（4枚画像）アシンメトリー配置 */}
+          <div className="flex-1 flex flex-col items-start justify-center">
+            {leftImages.map((img, i) => (
+              <div
+                key={i}
+                ref={addLeftRef}
+                className={`transition-all duration-700 ${img.mt}`}
+                style={{
+                  opacity: leftVisibles[i] ? 1 : 0,
+                  transform: leftVisibles[i] ? 'translateY(0)' : 'translateY(20px)'
+                }}
+              >
+                <img
+                  src={img.src}
+                  alt={`left-image-${i}`}
+                  className="w-64 h-64 object-cover rounded-lg shadow-lg"
+                />
+              </div>
+            ))}
+          </div>
+
+          {/* 中央カラム（狭くして細長い印象） */}
+          <div className="flex-none w-full md:w-1/4 flex flex-col justify-center items-center text-center space-y-16 mt-16 md:mt-0">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-800">
+              紹介文（仮)
+              
+            </h2>
+            <div className="space-y-8">
+              {introTexts.map((text, i) => (
+                <p
+                  key={i}
+                  ref={addIntroRef}
+                  className="text-gray-700 text-lg leading-relaxed transition-all duration-700 max-w-md mx-auto"
+                  style={{
+                    opacity: introVisibles[i] ? 1 : 0,
+                    transform: introVisibles[i] ? 'translateY(0)' : 'translateY(20px)'
+                  }}
+                >
+                  {text}
+                </p>
+              ))}
             </div>
           </div>
-        </motion.div>
 
-        <motion.div
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: isLoaded ? 1 : 0, x: isLoaded ? 0 : 20 }}
-          transition={{ duration: 1, ease: 'easeOut', delay: 1.5 }}
-          className="space-y-3 md:space-y-4"
-        >
-          <h2 className="text-2xl md:text-3xl font-semibold text-gray-800 mb-2 md:mb-4">
-            <TextAnimator targetText="令和5年度　実績" duration={2000} delay={1200} />
-          </h2>
-          <ul className="text-lg md:text-2xl text-gray-800 font-medium space-y-2">
-            <li><TextAnimator targetText="弘前高校 39人合格" duration={2000} delay={1400} /></li>
-            <li><TextAnimator targetText="弘前大学教育学部附属中学校 25人合格" duration={2000} delay={1600} /></li>
-          </ul>
-        </motion.div>
-      </div>
-    );
-  }
-
-  // PC版
-  return (
-    <section className="flex flex-row w-full overflow-hidden">
-      <div className="w-1/2 h-screen">
-        <GeometricAnimation />
-      </div>
-      
-      <div className="w-1/2 h-screen flex flex-col justify-center items-start p-10 bg-white">
-        <motion.div
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: isLoaded ? 1 : 0, x: isLoaded ? 0 : 20 }}
-          transition={{ duration: 1, ease: 'easeOut' }}
-          className="mb-10"
-        >
-          <h1 className="text-6xl font-bold text-gray-900 mb-4">
-            <TextAnimator targetText="Practice Makes Perfect" duration={2000} delay={600} />
-          </h1>
-          <div className="text-2xl font-medium text-gray-800 mb-4">
-            <TextAnimator targetText="弘前で最高の学習環境を提供するために" duration={2000} delay={1000} />
+          {/* 右カラム（4枚画像）アシンメトリー配置 */}
+          <div className="flex-1 flex flex-col items-end justify-center">
+            {rightImages.map((img, i) => (
+              <div
+                key={i}
+                ref={addRightRef}
+                className={`transition-all duration-700 ${img.mt}`}
+                style={{
+                  opacity: rightVisibles[i] ? 1 : 0,
+                  transform: rightVisibles[i] ? 'translateY(0)' : 'translateY(20px)'
+                }}
+              >
+                <img
+                  src={img.src}
+                  alt={`right-image-${i}`}
+                  className="w-64 h-64 object-cover rounded-lg shadow-lg"
+                />
+              </div>
+            ))}
           </div>
-          <div className="text-2xl font-medium text-gray-600 mt-4">
-            <TextAnimator targetText="弘前トップゼミナールは1992年の創設以来、30年以上地域の教育の最前線を走り続けています" duration={2000} delay={1000} />
-          </div>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: isLoaded ? 1 : 0, x: isLoaded ? 0 : 20 }}
-          transition={{ duration: 1, ease: 'easeOut', delay: 1.5 }}
-          className="space-y-4"
-        >
-          <h2 className="text-3xl font-semibold text-gray-800 mb-4">
-            <TextAnimator targetText="令和5年度　実績" duration={2000} delay={1200} />
-          </h2>
-          <ul className="text-2xl text-gray-800 font-medium space-y-2">
-            <li><TextAnimator targetText="弘前高校 39人合格" duration={2000} delay={1400} /></li>
-            <li><TextAnimator targetText="弘前大学教育学部附属中学校 25人合格" duration={2000} delay={1600} /></li>
-          </ul>
-        </motion.div>
-      </div>
-    </section>
+        </div>
+      </section>
+    </div>
   );
-};
+}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useRef } from "react";
+import { useRef, useCallback } from "react";
 import { GoogleMap, useLoadScript } from "@react-google-maps/api";
 import { motion } from "framer-motion";
 
@@ -9,66 +9,51 @@ const containerStyle = {
   height: "400px",
 };
 
-// 表示したい住所
-const address = "〒036-8153 青森県弘前市三岳町５−２";
-const name = "弘前トップゼミナール";
+// 喫茶kamiyamの情報
+const address = "青森県弘前市徳田町4-4";
+const name = "喫茶kamiya";
+// あらかじめ特定した座標（例）
+const position = { lat: 40.60317723153976, lng:140.47438958127282}
 
 export function MapSection() {
   const { isLoaded, loadError } = useLoadScript({
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "",
-    libraries: [], // 必要に応じてライブラリを追加
+    libraries: [],
   });
 
   const mapRef = useRef<google.maps.Map | null>(null);
   const markerRef = useRef<google.maps.Marker | null>(null);
   const infoWindowRef = useRef<google.maps.InfoWindow | null>(null);
-  const [position, setPosition] = useState<google.maps.LatLngLiteral | null>(null);
-
-  // 住所を緯度経度に変換（ジオコーディング）
-  const geocodeAddress = useCallback((geocoder: google.maps.Geocoder, map: google.maps.Map) => {
-    geocoder.geocode({ address }, (results, status) => {
-      if (status === "OK" && results && results.length > 0) {
-        const loc = results[0].geometry.location;
-        const latLng = { lat: loc.lat(), lng: loc.lng() };
-        setPosition(latLng);
-        map.setCenter(latLng);
-
-        // マーカー作成
-        const marker = new google.maps.Marker({
-          position: latLng,
-          map: map,
-          title: name,
-        });
-        markerRef.current = marker;
-
-        // InfoWindowの内容をHTML文字列で指定
-        const infoWindowContent = `
-          <div style="color: #333; font-family: sans-serif;">
-            <h3 style="font-size:16px; font-weight:bold; margin-bottom:4px;">${name}</h3>
-            <p style="margin:0;">${address}</p>
-          </div>
-        `;
-        const infoWindow = new google.maps.InfoWindow({
-          content: infoWindowContent,
-        });
-        infoWindowRef.current = infoWindow;
-
-        marker.addListener("click", () => {
-          infoWindow.open(map, marker);
-        });
-      } else {
-        console.error("Geocode was not successful for the following reason: " + status);
-      }
-    });
-  }, []);
 
   const onLoad = useCallback((map: google.maps.Map) => {
     mapRef.current = map;
-    const geocoder = new google.maps.Geocoder();
-    geocodeAddress(geocoder, map);
-  }, [geocodeAddress]);
+    map.setCenter(position);
+    map.setZoom(15);
 
-  const onUnmount = useCallback((map: google.maps.Map) => {
+    const marker = new google.maps.Marker({
+      position,
+      map,
+      title: name,
+    });
+    markerRef.current = marker;
+
+    const infoWindowContent = `
+      <div style="color: #333; font-family: sans-serif;">
+        <h3 style="font-size:16px; font-weight:bold; margin-bottom:4px;">${name}</h3>
+        <p style="margin:0;">${address}</p>
+      </div>
+    `;
+    const infoWindow = new google.maps.InfoWindow({
+      content: infoWindowContent,
+    });
+    infoWindowRef.current = infoWindow;
+
+    marker.addListener("click", () => {
+      infoWindow.open(map, marker);
+    });
+  }, []);
+
+  const onUnmount = useCallback(() => {
     mapRef.current = null;
     if (markerRef.current) {
       markerRef.current.setMap(null);
@@ -123,7 +108,7 @@ export function MapSection() {
         >
           <GoogleMap
             mapContainerStyle={containerStyle}
-            center={position || { lat: 35.6762, lng: 139.6503 }} // 東京付近を一時的に表示
+            center={position}
             zoom={15}
             onLoad={onLoad}
             onUnmount={onUnmount}

@@ -38,9 +38,9 @@ export function NewsSection() {
 
   if (loading) {
     return (
-      <section className="py-20 bg-white">
+      <section className="py-20 bg-gradient-to-b from-white to-[#fdf2e9]">
         <div className="container mx-auto px-6 text-center">
-          <p className="text-black opacity-70">お知らせを読み込んでいます...</p>
+          <p className="text-gray-800 opacity-70">お知らせを読み込んでいます...</p>
         </div>
       </section>
     );
@@ -48,45 +48,45 @@ export function NewsSection() {
 
   if (error) {
     return (
-      <section className="py-20 bg-white">
+      <section className="py-20 bg-gradient-to-b from-white to-[#fdf2e9]">
         <div className="container mx-auto px-6 text-center">
-          <p className="text-black opacity-70">{error}</p>
+          <p className="text-gray-800 opacity-70">{error}</p>
         </div>
       </section>
     );
   }
 
   return (
-    <section className="py-20 bg-white">
+    <section className="py-20 bg-gradient-to-b from-white to-[#fdf2e9]">
       <div className="container mx-auto px-6">
-        <h2 className="text-4xl font-extrabold text-center mb-16 text-black tracking-wide">
+        <h2 className="text-4xl font-bold font-serif tracking-wide text-center mb-16 text-gray-900">
           最新のお知らせ
         </h2>
         <div className="space-y-8 max-w-4xl mx-auto">
           {articles.map((article) => (
             <Card
               key={article.id}
-              className="flex flex-col md:flex-row items-start gap-6 bg-white border border-gray-300 p-6 transition-transform duration-300 hover:opacity-90"
+              className="flex flex-col md:flex-row items-start gap-6 bg-white rounded-lg shadow-md p-6 transition-transform duration-300 hover:shadow-lg hover:scale-[1.01]"
             >
-              <div className="flex-shrink-0 text-black">
+              <div className="flex-shrink-0 text-gray-700">
                 <Calendar className="w-8 h-8" />
               </div>
               <div className="flex-1">
                 <CardHeader className="p-0">
-                  <CardTitle className="text-2xl font-semibold text-black">
+                  <CardTitle className="text-2xl font-serif font-semibold text-gray-900">
                     {article.title}
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="p-0 mt-2">
+                <CardContent className="p-0 mt-3">
                   <div
-                    className="text-black text-sm md:text-base line-clamp-3 leading-relaxed"
+                    className="text-gray-800 text-sm md:text-base leading-relaxed line-clamp-3"
                     dangerouslySetInnerHTML={{ __html: article.content }}
                   />
                 </CardContent>
                 <div className="mt-4">
                   <Link
                     href={`/news/${article.id}`}
-                    className="text-black underline underline-offset-4 hover:opacity-75"
+                    className="text-gray-800 underline underline-offset-4 hover:opacity-75 transition-colors"
                   >
                     続きを読む →
                   </Link>
@@ -97,7 +97,7 @@ export function NewsSection() {
         </div>
         <div className="mt-16 text-center">
           <Link href="/news">
-            <button className="px-6 py-3 bg-black text-white font-bold text-lg rounded-sm hover:opacity-75 transition">
+            <button className="px-6 py-3 bg-gray-900 text-white font-bold text-lg rounded-sm hover:opacity-80 transition">
               全てのお知らせを見る
             </button>
           </Link>

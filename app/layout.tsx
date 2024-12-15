@@ -1,7 +1,7 @@
 import './globals.css';
 import type { Metadata } from 'next';
 import { Montserrat } from 'next/font/google';
-import { FloatingNav } from '@/components/floating-nav';
+
 
 // Montserrat フォントをインポート
 const montserrat = Montserrat({
@@ -23,7 +23,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={montserrat.variable}> {/* Montserrat を適用 */}
       <body>
-        <FloatingNav /> {/* ナビゲーションバー */}
+       
         {children}
       </body>
     </html>
