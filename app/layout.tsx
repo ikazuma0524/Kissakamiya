@@ -23,7 +23,6 @@ export default function RootLayout({
   return (
     <html lang="en" className={montserrat.variable}> {/* Montserrat を適用 */}
       <body>
-       
         {children}
       </body>
     </html>
